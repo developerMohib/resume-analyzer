@@ -1,9 +1,10 @@
 import type { Route } from "./+types/home";
 import { Link, useNavigate } from "react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "~/components/Navbar";
 import ResumeCard from "~/components/ResumeCard";
 import { resumes } from "../../constants";
+import { usePuterStore } from "~/lib/puter";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -14,14 +15,26 @@ export function meta({ }: Route.MetaArgs) {
 
 export default function Home() {
 
-  // const { auth, kv } = usePuterStore();
+  const { auth, kv } = usePuterStore();
   const navigate = useNavigate();
   const [loadingResumes, setLoadingResumes] = useState(false);
 
+  useEffect(() => {
+    if (!auth.isAuthenticated) {
+      navigate("/auth?next=/");
+    } else {
+      setLoadingResumes(true);
+      kv.get("resumes").then((res) => {
+        console.log("resumes from kv", res);
+        setLoadingResumes(false);
+      });
+    }
+  }, [auth.isAuthenticated, navigate, kv]);
 
   return (
     <main className="bg-[url('/images/bg-main.svg')] bg-cover">
       <Navbar />
+      {/* {window.puter.ai.} */}
 
       <section className="main-section">
         <div className="page-heading py-16">
